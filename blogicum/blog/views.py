@@ -36,7 +36,6 @@ def category_posts(request, category_slug):
             category=category,
             is_published=True,
             pub_date__lte=timezone.now()
-            # published_at__lte=timezone.now()
         ).order_by('-created_at')
     except Category.DoesNotExist:
         return HttpResponseNotFound('<h1>404 Category not found</h1>')
