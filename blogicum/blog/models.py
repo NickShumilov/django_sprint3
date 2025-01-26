@@ -48,7 +48,6 @@ class Post(models.Model):
         Category,
         on_delete=models.SET_NULL,
         null=True,
-        blank=True,
         related_name='post',
         verbose_name='Категория',
         help_text='Укажите категорию для публикации.'
