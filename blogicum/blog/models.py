@@ -1,13 +1,16 @@
 from django.db import models
-# from core.models import PublishedModel
+from core.models import IsPublishedModel
 from django.contrib.auth import get_user_model
 
+Max_length_of_CharField = 256
 User = get_user_model()
 
 
-class Location(models.Model):
-    name = models.CharField('Название места', max_length=256)
-    is_published = models.BooleanField('Опубликовано', default=True)
+class Location(IsPublishedModel):
+    name = models.CharField(
+        'Название места',
+        max_length=Max_length_of_CharField
+    )
     created_at = models.DateTimeField('Добавлено', auto_now_add=True)
 
     class Meta:
@@ -18,8 +21,8 @@ class Location(models.Model):
         return self.name
 
 
-class Category(models.Model):
-    title = models.CharField('Заголовок', max_length=256)
+class Category(IsPublishedModel):
+    title = models.CharField('Заголовок', max_length=Max_length_of_CharField)
     description = models.TextField('Описание', )
     slug = models.SlugField(
         'Идентификатор',
@@ -27,11 +30,6 @@ class Category(models.Model):
         help_text='Идентификатор страницы для URL; '
                   'разрешены символы латиницы, цифры, дефис '
                   'и подчёркивание.'
-    )
-    is_published = models.BooleanField(
-        'Опубликовано',
-        default=True,
-        help_text='Снимите галочку, чтобы скрыть публикацию.'
     )
     created_at = models.DateTimeField('Добавлено', auto_now_add=True)
 
@@ -43,22 +41,17 @@ class Category(models.Model):
         return self.title
 
 
-class Post(models.Model):
+class Post(IsPublishedModel):
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='post',
+        related_name='posts',
         verbose_name='Категория',
         help_text='Укажите категорию для публикации.'
     )
-    is_published = models.BooleanField(
-        'Опубликовано',
-        default=True,
-        help_text='Снимите галочку, чтобы скрыть публикацию.'
-    )
     created_at = models.DateTimeField('Добавлено', auto_now_add=True)
-    title = models.CharField('Заголовок', max_length=256)
+    title = models.CharField('Заголовок', max_length=Max_length_of_CharField)
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -75,6 +68,7 @@ class Post(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
+        related_name='locations',
         verbose_name='Местоположение',
         help_text='Укажите местоположение '
         'публикации.'

@@ -1,7 +1,10 @@
 from django.shortcuts import render
-from django.http import HttpResponseNotFound
+from django.shortcuts import get_object_or_404
+from django.http import Http404
 from django.utils import timezone
 from blog.models import Post, Category
+
+Max_Posts_on_page = 5
 
 
 def index(request):
@@ -9,36 +12,32 @@ def index(request):
         is_published=True,
         category__is_published=True,
         pub_date__lte=timezone.now()
-    ).order_by('-created_at')[:5]
-
+    ).order_by('-created_at')[:Max_Posts_on_page]
     return render(request, 'blog/index.html', {'post_list': post_list})
 
 
 def post_detail(request, post_id):
-    try:
-        post = Post.objects.get(id=post_id)
-        if not post.is_published or post.pub_date > timezone.now():
-            return HttpResponseNotFound('<h1>404 Post not found</h1>')
-        if not post.category.is_published:
-            return HttpResponseNotFound('<h1>404 Post not found</h1>')
-    except Post.DoesNotExist:
-        return HttpResponseNotFound('<h1>404 Post not found</h1>')
-    else:
-        return render(request, 'blog/detail.html', {'post': post})
+    post = get_object_or_404(
+        Post,
+        is_published=True,
+        id=post_id
+    )
+    if not post.category.is_published or post.pub_date > timezone.now():
+        raise Http404('<h1>404 Post not found</h1>')
+    return render(request, 'blog/detail.html', {'post': post})
 
 
 def category_posts(request, category_slug):
-    try:
-        category = Category.objects.get(slug=category_slug)
-        if not category.is_published:
-            return HttpResponseNotFound('<h1>404 Category not found</h1>')
-        post_list = Post.objects.filter(
-            category=category,
-            is_published=True,
-            pub_date__lte=timezone.now()
-        ).order_by('-created_at')
-    except Category.DoesNotExist:
-        return HttpResponseNotFound('<h1>404 Category not found</h1>')
+    category = get_object_or_404(
+        Category,
+        is_published=True,
+        slug=category_slug
+    )
+    post_list = Post.objects.filter(
+        category=category,
+        is_published=True,
+        pub_date__lte=timezone.now()
+    ).order_by('-created_at')
     return render(
         request,
         'blog/category.html',
