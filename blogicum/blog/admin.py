@@ -1,9 +1,7 @@
 from django.contrib import admin
-
 from .models import Location
 from .models import Category
 from .models import Post
-
 
 
 class LocationAdmin(admin.ModelAdmin):
@@ -16,8 +14,8 @@ class LocationAdmin(admin.ModelAdmin):
         'created_at',
     )
     list_filter = (
-       'name',
-       'created_at',
+        'name',
+        'created_at',
     )
     list_display_links = ('name',)
 
